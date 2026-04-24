@@ -74,20 +74,25 @@
         }
 
        
-         .advice-text.rare {
-            color: #c084fc !important;  /* яркий фиолетовый */
-            text-shadow: 0 0 10px #a855f7, 0 0 20px #3b82f6, 0 0 30px #8b5cf6 !important;
-            animation: rarePulse 1s ease-in-out infinite alternate;
+          .advice-text.rare {
+            background: linear-gradient(135deg, #3b82f6, #a855f7, #3b82f6);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 2s ease infinite;
+            text-shadow: none;
         }
 
-        @keyframes rarePulse {
+        @keyframes gradientShift {
             0% {
-                text-shadow: 0 0 8px #a855f7, 0 0 15px #3b82f6;
-                color: #c084fc;
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
             }
             100% {
-                text-shadow: 0 0 20px #d8b4fe, 0 0 35px #60a5fa, 0 0 45px #a855f7;
-                color: #e9d5ff;
+                background-position: 0% 50%;
             }
         }
 

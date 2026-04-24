@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор советов дня </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f9efe2; 
+            font-family: 'Segoe UI', 'Arial Black', 'Impact', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: background 0.3s;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px 20px;
+        }
+        .kaomoji-area {
+            font-size: 48px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-shadow: 0 0 10px rgba(255,200,150,0.8);
+        }
+        .kaomoji-area:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 64px;
+            font-weight: 900;
+            color: #d48c5b;
+            text-shadow: 4px 4px 0px #f5d5b3,
+                         8px 8px 0px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .advice-box {
+            background: #fffaf5;
+            border-radius: 30px;
+            padding: 50px 30px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+    
+        .advice-text {
+            font-size: 32px;
+            font-weight: bold;
+            color: #222;
+            text-shadow: 3px 3px 0px #f0d5b5,
+                         5px 5px 0px rgba(0,0,0,0.05);
+            line-height: 1.4;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
+            transition: all 0.3s;
+        }
+
+       
+        .advice-text.rare {
+            background: linear-gradient(135deg, #a855f7, #3b82f6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px #a855f7, 0 0 30px #3b82f6;
+            animation: rareGlow 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes rareGlow {
+            0% {
+                text-shadow: 0 0 8px #a855f7, 0 0 15px #3b82f6;
+            }
+            100% {
+                text-shadow: 0 0 20px #c084fc, 0 0 35px #60a5fa;
+            }
+        }
+
+       
+        .clicker-btn {
+            background: #e67e22;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            font-family: inherit;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #b45f1b;
+            transition: 0.08s linear;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 20px auto;
+            display: inline-block;
+        }
+
+        .clicker-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 5px 0 #b45f1b;
+        }
+
+        .counter {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #b87a4f;
+            background: #f5e6d8;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: 2px solid #e67e22;
+            color: #e67e22;
+            font-size: 18px;
+            padding: 8px 20px;
+            margin-top: 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .favorite-btn:hover {
+            background: #e67e22;
+            color: white;
+        }
+
+        .favorites-list {
+            margin-top: 40px;
+            text-align: left;
+            background: #fff5ec;
+            border-radius: 20px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .favorites-list h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #e67e22;
+        }
+
+        .favorites-list ul {
+            list-style: none;
+        }
+
+        .favorites-list li {
+            padding: 8px;
+            border-bottom: 1px solid #f0cfb5;
+            font-size: 16px;
+        }
+
+    
+        .cats-celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .cat-side {
+            position: absolute;
+            font-size: 50px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .cat-left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .cat-right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .cat-show {
+            opacity: 1;
+            animation: catWiggle 0.5s ease;
+        }
+
+        @keyframes catWiggle {
+            0%, 100% { transform: translateY(-50%) rotate(0deg); }
+            25% { transform: translateY(-50%) rotate(10deg); }
+            75% { transform: translateY(-50%) rotate(-10deg); }
+        }
+
+       
+        .music-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="kaomoji-area" id="kaomoji">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</div>
+    <h1> СОВЕТ ДНЯ </h1>
+
+    <div class="advice-box">
+        <div class="advice-text" id="adviceDisplay">
+             Нажми на кнопку 
+        </div>
+    </div>
+
+    <button class="clicker-btn" id="getAdviceBtn">
+         ПОЛУЧИТЬ СОВЕТ 
+    </button>
+    
+    <div class="counter">
+         Получено советов: <span id="counterValue">0</span>
+    </div>
+
+    <button class="favorite-btn" id="favoriteBtn">
+         СОХРАНИТЬ В ИЗБРАННОЕ
+    </button>
+    
+    <div class="favorites-list">
+        <h3> ИЗБРАННЫЕ СОВЕТЫ </h3>
+        <ul id="favoritesList">
+            <li>Пока пусто...</li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="cats-celebration">
+    <div class="cat-side cat-left" id="catLeft">(=^･ω･^=)</div>
+    <div class="cat-side cat-right" id="catRight">(=^･ω･^=)</div>
+</div>
+
+
+<button class="music-toggle" id="musicToggleBtn">🎵 Включить лофи</button>
+
+<script>
+   
+    const adviceArray = [
+        "Выпей стакан воды прямо сейчас ",
+        "Сделай 10 глубоких вдохов ",
+        "Напиши кому-то тёплое сообщение ",
+        "Проветри комнату ",
+        "Улыбнись себе в зеркало ",
+        "Поставь цель на сегодня ",
+        "Отдохни 5 минут без экрана ",
+        "Помой попу ",
+        "Съешь что-то полезное ",
+        "Сделай маленький перерыв на растяжку ",
+        "Запиши одну хорошую мысль ",
+        "Послушай любимую песню ",
+        "Погладь кота ",
+        "Подумай о своей мечте ",
+        "Просто ничего не делай 2 минуты "
+    ];
+
+    
+    const rareAdviceArray = [
+        " Шушурик",
+        " Не еби себе мозг, просто будь",
+        " Твоя интуиция шепчет: сделай этот шаг!",
+        " Звёзды выстроились в твою пользу",
+        " Редкий момент: ты ровно там, где нужно быть"
+    ];
+
+    let clickCount = 0;
+    let currentAdvice = " Нажми на кнопку ";
+    let favorites = [];
+    let isRare = false;
+
+
+    const adviceDisplay = document.getElementById('adviceDisplay');
+    const counterSpan = document.getElementById('counterValue');
+    const getBtn = document.getElementById('getAdviceBtn');
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const favoritesList = document.getElementById('favoritesList');
+    const kaomojiEl = document.getElementById('kaomoji');
+    const catLeft = document.getElementById('catLeft');
+    const catRight = document.getElementById('catRight');
+
+
+    let audioCtx = null;
+    let lofiOscillator = null;
+    let lofiGain = null;
+    let lofiInterval = null;
+    let musicPlaying = false;
+
+ 
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+  
+    function playClick() {
+        try {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 880;
+            gain.gain.value = 0.15;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.2);
+            osc.stop(ctx.currentTime + 0.2);
+        } catch(e) { console.log("Клик не сыграл"); }
+    }
+
+   
+    function playMeow() {
+        try {
+            const ctx = initAudio();
+            const now = ctx.currentTime;
+            
+          
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.frequency.value = 523.25; 
+            gain1.gain.value = 0.2;
+            
+   
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.frequency.value = 659.25; 
+            gain2.gain.value = 0.15;
+            
+            osc1.start();
+            osc2.start();
+            
+            
+            gain1.gain.exponentialRampToValueAtTime(0.00001, now + 0.3);
+            gain2.gain.exponentialRampToValueAtTime(0.00001, now + 0.25);
+            
+     
+            osc1.frequency.exponentialRampToValueAtTime(392.00, now + 0.2);
+            osc2.frequency.exponentialRampToValueAtValue(523.25, now + 0.15);
+            
+            osc1.stop(now + 0.3);
+            osc2.stop(now + 0.25);
+        } catch(e) { console.log("Мяу не сыграл"); }
+    }
+
+    
+    function startLofi() {
+        if (musicPlaying) return;
+        try {
+            const ctx = initAudio();
+            musicPlaying = true;
+            
+        
+            const playNote = (freq, duration, volume, startTime) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.value = volume;
+                osc.start(startTime);
+                gain.gain.exponentialRampToValueAtTime(0.00001, startTime + duration);
+                osc.stop(startTime + duration);
+            };
+            
+        
+            let time = ctx.currentTime + 0.1;
+            const notes = [261.63, 293.66, 329.63, 261.63, 329.63, 293.66, 261.63]; 
+            
+            function playLoop() {
+                if (!musicPlaying) return;
+                const now = ctx.currentTime;
+                let currentTime = now;
+                for (let i = 0; i < notes.length; i++) {
+                    playNote(notes[i], 0.4, 0.08, currentTime);
+                    currentTime += 0.45;
+                }
+          
+                lofiInterval = setTimeout(playLoop, 3500);
+            }
+            
+  
+            const bassInterval = setInterval(() => {
+                if (!musicPlaying) {
+                    clearInterval(bassInterval);
+                    return;
+                }
+                const now = ctx.currentTime;
+                const bass = ctx.createOscillator();
+                const bassGain = ctx.createGain();
+                bass.connect(bassGain);
+                bassGain.connect(ctx.destination);
+                bass.frequency.value = 130.81; 
+                bassGain.gain.value = 0.05;
+                bass.start(now);
+                bassGain.gain.exponentialRampToValueAtTime(0.00001, now + 0.8);
+                bass.stop(now + 0.8);
+            }, 2000);
+            
+            playLoop();
+            
+        
+            window.lofiBassInterval = bassInterval;
+        } catch(e) { console.log("Музыка не запустилась"); }
+    }
+    
+    function stopLofi() {
+        musicPlaying = false;
+        if (lofiInterval) clearTimeout(lofiInterval);
+        if (window.lofiBassInterval) clearInterval(window.lofiBassInterval);
+    }
+    
+    function toggleMusic() {
+        initAudio();
+        if (musicPlaying) {
+            stopLofi();
+            document.getElementById('musicToggleBtn').textContent = "🎵 Включить лофи";
+        } else {
+            startLofi();
+            document.getElementById('musicToggleBtn').textContent = "🔇 Выключить лофи";
+        }
+    }
+
+
+    function showCatsCelebration() {
+        catLeft.classList.add('cat-show');
+        catRight.classList.add('cat-show');
+        setTimeout(() => {
+            catLeft.classList.remove('cat-show');
+            catRight.classList.remove('cat-show');
+        }, 2000);
+    }
+
+
+    function getRandomAdviceWithRarity() {
+        const random = Math.random();
+        const isRareAdvice = random < 0.2; 
+        
+        if (isRareAdvice) {
+            isRare = true;
+            const rareIndex = Math.floor(Math.random() * rareAdviceArray.length);
+            return rareAdviceArray[rareIndex];
+        } else {
+            isRare = false;
+            const normalIndex = Math.floor(Math.random() * adviceArray.length);
+            return adviceArray[normalIndex];
+        }
+    }
+
+
+    function generateNewAdvice() {
+        playClick();  
+        
+        const newAdvice = getRandomAdviceWithRarity();
+        currentAdvice = newAdvice;
+        
+      
+        if (isRare) {
+            adviceDisplay.classList.add('rare');
+            adviceDisplay.style.background = "none";
+          
+            playMeow();
+            showCatsCelebration();
+         
+            kaomojiEl.textContent = "✨(>^_^)>✨ <(^_^<)✨";
+            setTimeout(() => {
+                if (kaomojiEl) kaomojiEl.textContent = "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧";
+            }, 2000);
+        } else {
+            adviceDisplay.classList.remove('rare');
+            kaomojiEl.textContent = "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧";
+        }
+        
+        adviceDisplay.textContent = newAdvice;
+        clickCount++;
+        counterSpan.textContent = clickCount;
+        
+    
+        adviceDisplay.style.transform = "scale(1.02)";
+        setTimeout(() => {
+            adviceDisplay.style.transform = "scale(1)";
+        }, 150);
+    }
+
+   
+    function saveToFavorites() {
+        if (currentAdvice !== " Нажми на кнопку " && currentAdvice !== "") {
+            if (!favorites.includes(currentAdvice)) {
+                favorites.push(currentAdvice);
+                updateFavoritesUI();
+   
+                showCatsCelebration();
+                playClick(); 
+                favoriteBtn.style.transform = "scale(0.95)";
+                setTimeout(() => {
+                    favoriteBtn.style.transform = "scale(1)";
+                }, 150);
+            } else {
+                alert("Этот совет уже в избранном! ");
+            }
+        } else {
+            alert("Сначала получи совет, нажав на оранжевую кнопку! ");
+        }
+    }
+
+    function updateFavoritesUI() {
+        if (favorites.length === 0) {
+            favoritesList.innerHTML = '<li>Пока пусто...</li>';
+            return;
+        }
+        let html = '';
+        for (let i = 0; i < favorites.length; i++) {
+            const isRareFav = rareAdviceArray.includes(favorites[i]);
+            if (isRareFav) {
+                html += `<li style="color:#a855f7; text-shadow:0 0 2px violet;"> ${favorites[i]} </li>`;
+            } else {
+                html += `<li>📌 ${favorites[i]}</li>`;
+            }
+        }
+        favoritesList.innerHTML = html;
+    }
+
+  
+    const musicBtn = document.getElementById('musicToggleBtn');
+    musicBtn.addEventListener('click', () => {
+        toggleMusic();
+    });
+
+ 
+    function enableAudioOnFirstInteraction() {
+        initAudio();
+        document.removeEventListener('click', enableAudioOnFirstInteraction);
+        document.removeEventListener('keydown', enableAudioOnFirstInteraction);
+    }
+    document.addEventListener('click', enableAudioOnFirstInteraction);
+    document.addEventListener('keydown', enableAudioOnFirstInteraction);
+
+    window.addEventListener('load', () => {
+        adviceDisplay.textContent = " Нажми на кнопку ";
+        adviceDisplay.classList.remove('rare');
+        clickCount = 0;
+        counterSpan.textContent = "0";
+        currentAdvice = " Нажми на кнопку ";
+        kaomojiEl.textContent = "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧";
+    });
+
+    getBtn.addEventListener('click', generateNewAdvice);
+    favoriteBtn.addEventListener('click', saveToFavorites);
+</script>
+</body>
+</html>
